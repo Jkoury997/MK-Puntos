@@ -1,0 +1,111 @@
+/* 🎨 Tema Marcela Koury (rosa) SIN OKLCH */
+
+:root {
+  /* Fondo claro y texto principal */
+  --background: 0 0% 100%;        /* blanco */
+  --foreground: 240 10% 3.9%;     /* casi negro */
+
+  /* Tarjetas / superficies */
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+
+  /* Popovers / dropdowns / modales */
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+
+  /* Rosa oficial MK (#df7eb2 aprox) */
+  --primary: 329 63% 68%;
+  --primary-foreground: 0 0% 100%;
+  /* Hover un poco más oscuro */
+  --primary-hover: 329 63% 58%;
+
+  /* Secundario y grises suaves */
+  --secondary: 330 10% 25%;
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 330 10% 96%;
+  --muted-foreground: 330 10% 45%;
+
+  --accent: 330 35% 88%;
+  --accent-foreground: 330 10% 25%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Bordes, inputs y focus ring */
+  --border: 330 10% 92%;
+  --input: 330 10% 96%;
+  --ring: 329 63% 68%;
+
+  /* Radios por defecto (shadcn style) */
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 100%;
+
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 100%;
+
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 100%;
+
+  --primary: 329 63% 68%;
+  --primary-foreground: 0 0% 100%;
+  --primary-hover: 329 63% 58%;
+
+  --secondary: 330 10% 20%;
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 330 10% 20%;
+  --muted-foreground: 330 10% 70%;
+
+  --accent: 330 10% 20%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 72% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 330 10% 20%;
+  --input: 330 10% 20%;
+  --ring: 329 63% 68%;
+}
+
+.bg-MarcelaKoury{
+  background-color: #df7eb2
+}
+
+/* Base SOLO para distribuidoras (body.dist) */
+@layer distribuidoras-base {
+  body.dist {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+
+/* Animaciones suaves que sí usás */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
