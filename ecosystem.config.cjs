@@ -8,6 +8,7 @@ module.exports = {
       interpreter: 'node', // Usa Node.js como intérprete
       env: {
         NODE_ENV: 'production', // Establece el entorno de producción
+        PORT: 6000
       },
     },
   ],
