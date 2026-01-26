@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const URL_API_JINX = process.env.NEXT_PUBLIC_URL_API_JINX;
-const Empresa = process.env.NEXT_PUBLIC_EMPRESA
+// Server-side only - no exponer al cliente
+const URL_API_JINX = process.env.URL_API_JINX || process.env.NEXT_PUBLIC_URL_API_JINX;
+const Empresa = process.env.EMPRESA || process.env.NEXT_PUBLIC_EMPRESA;
 
 export async function GET(req) {
     
@@ -18,6 +19,11 @@ export async function GET(req) {
         }
 
 
+        // Verificar que AccessKey existe antes de usar
+        if (!AccessKey?.value) {
+            return NextResponse.json({ error: 'AccessKey no encontrado' }, { status: 401 });
+        }
+
         // Enviar la solicitud de acceso al backend
         const response = await fetch(`${URL_API_JINX}/api/UserAccess`, {
             method: 'POST',
@@ -31,7 +37,13 @@ export async function GET(req) {
 
         if (responseData.Estado) {
             // Guardar tokens en cookies solo si Estado es true
-            cookieStore.set('Token', responseData.Token, { path: '/',maxAge: 21600 });
+            cookieStore.set('Token', responseData.Token, {
+                path: '/',
+                maxAge: 21600,
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
+            });
 
             return NextResponse.json(responseData);
         } else {

@@ -21,7 +21,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const fecthRefreshToken = async () => {
+    const fetchRefreshToken = async () => {
       try {
         const response = await fetch("/api/auth/refreshtoken");
         if (!response.ok) {
@@ -35,7 +35,7 @@ export default function LoginPage() {
       }
     };
 
-    fecthRefreshToken(); // Ejecutar la función dentro del useEffect
+    fetchRefreshToken(); // Ejecutar la función dentro del useEffect
   }, []); 
 
   // Limpiar el estado del error y error de dispositivo al intentar de nuevo

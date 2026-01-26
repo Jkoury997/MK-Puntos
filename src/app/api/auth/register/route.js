@@ -49,6 +49,9 @@ export async function POST(req) {
         if (response.ok) {
             cookieStore.set('userId', responseData.user._id, {
                 path: '/',
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
             });
             return NextResponse.json(responseData, { status: 201 });
         } else {

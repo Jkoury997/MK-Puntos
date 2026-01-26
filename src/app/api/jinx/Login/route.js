@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const URL_API_JINX = process.env.NEXT_PUBLIC_URL_API_JINX;
-const EMAIL_NASUS = process.env.NEXT_PUBLIC_EMAIL_NASUS;
-const PASSWORD_NASUS = process.env.NEXT_PUBLIC_PASSWORD_NASUS;
+// Server-side only - no exponer al cliente
+const URL_API_JINX = process.env.URL_API_JINX || process.env.NEXT_PUBLIC_URL_API_JINX;
+const EMAIL_NASUS = process.env.EMAIL_NASUS;
+const PASSWORD_NASUS = process.env.PASSWORD_NASUS;
 
 export async function GET(req) {
     try {
@@ -31,6 +32,9 @@ export async function GET(req) {
             cookieStore.set('AccessKey', responseData.AccessKey, {
                 path: '/',
                 maxAge: 21600, // 6 horas en segundos
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
             });
             return NextResponse.json(responseData);
         } else {

@@ -27,14 +27,11 @@ export async function POST(request) {
       body: JSON.stringify({ email})
     });
 
-    const data = await response.json()
-    console.log(data)
+    const data = await response.json();
 
     if (!response.ok) {
-      const errorDetails = await response.json();
-      return NextResponse.json({ error: errorDetails.message || 'Error al enviar el correo de recuperación' }, { status: response.status });
+      return NextResponse.json({ error: data.message || 'Error al enviar el correo de recuperación' }, { status: response.status });
     }
-
 
     return NextResponse.json({ message: 'Correo de recuperación enviado' }, { status: 200 });
   } catch (error) {

@@ -29,6 +29,10 @@ export async function POST(req) {
         const cookieStore = cookies();
         const Token = cookieStore.get("Token");
 
+        if (!Token?.value) {
+            return NextResponse.json({ error: 'Token no encontrado. Por favor inicie sesión.' }, { status: 401 });
+        }
+
         // Transformar a primera letra en mayúscula
         firstName = capitalizeFirstLetter(firstName);
         lastName = capitalizeFirstLetter(lastName);
@@ -55,10 +59,10 @@ export async function POST(req) {
 
         const responseData = await response.json();
 
-        if (response.Estado) {
+        if (response.ok && responseData.Estado) {
             return NextResponse.json(responseData, { status: 201 });
         } else {
-            return NextResponse.json({ error: responseData.message }, { status: response.status });
+            return NextResponse.json({ error: responseData.Mensaje || responseData.message || 'Error al registrar cliente' }, { status: response.status || 400 });
         }
     } catch (error) {
         console.error('Error during registration:', error);

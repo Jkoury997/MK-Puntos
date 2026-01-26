@@ -23,10 +23,16 @@ export async function POST(req) {
         const responseData = await response.json();
 
         if (response.ok) {
-            // Guardar tokens en cookies
-            cookieStore.set('accessToken', responseData.accessToken, { path: '/' });
-            cookieStore.set('refreshToken', responseData.refreshToken, { path: '/' });
-            cookieStore.set('userId', responseData.user._id, { path: '/' });
+            // Guardar tokens en cookies con seguridad
+            const cookieOptions = {
+                path: '/',
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
+            };
+            cookieStore.set('accessToken', responseData.accessToken, cookieOptions);
+            cookieStore.set('refreshToken', responseData.refreshToken, cookieOptions);
+            cookieStore.set('userId', responseData.user._id, cookieOptions);
             
 
             return NextResponse.json(responseData);

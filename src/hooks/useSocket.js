@@ -50,7 +50,11 @@ export const initializeSocket = (userId, toast, userInteracted) => {
 export const disconnectSocket = () => {
   if (socket) {
     console.log("Disconnecting WebSocket...");
+    // Limpiar todos los event listeners para evitar memory leaks
     socket.off("notification");
+    socket.off("connect");
+    socket.off("disconnect");
+    socket.off("connect_error");
     socket.disconnect();
     socket = null;
   }
