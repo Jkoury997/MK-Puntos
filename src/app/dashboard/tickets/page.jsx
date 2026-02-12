@@ -52,7 +52,19 @@ export default function TicketsPage() {
     );
   }
 
-  const ticketList = tickets?.Lista || [];
+  // Ordenar del más nuevo al más viejo
+  const ticketList = (tickets?.Lista || []).sort((a, b) => {
+    // Formato de fecha esperado: DD/MM/YYYY o similar
+    const parseDate = (dateStr) => {
+      if (!dateStr) return 0;
+      const parts = dateStr.split('/');
+      if (parts.length === 3) {
+        return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+      }
+      return new Date(dateStr).getTime();
+    };
+    return parseDate(b.Fecha) - parseDate(a.Fecha);
+  });
 
   return (
     <div className="space-y-4">
