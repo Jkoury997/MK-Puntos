@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Navigation, Search, ExternalLink } from "lucide-react";
+import { MapPin, Navigation, Search, ExternalLink, Star, MessageSquarePlus } from "lucide-react";
 
 export default function LocalesPage() {
   const [stores, setStores] = useState([]);
@@ -53,38 +53,20 @@ export default function LocalesPage() {
     return () => { isMounted = false; };
   }, []);
 
-  // Load stores
+  // Load stores from API with cache
   useEffect(() => {
     let isMounted = true;
     const controller = new AbortController();
 
     const loadStores = async () => {
       try {
-        const response = await fetch("/places-details.json", { signal: controller.signal });
+        const response = await fetch("/api/stores", { signal: controller.signal });
         if (!response.ok) throw new Error("Error loading stores");
 
         const data = await response.json();
 
-        const storesArray = Object.keys(data)
-          .map((key) => {
-            const store = data[key];
-            if (store.location?.latitude && store.location?.longitude) {
-              return {
-                id: key,
-                name: store.displayName?.text || "Sin nombre",
-                lat: store.location.latitude,
-                lng: store.location.longitude,
-                address: store.formattedAddress || "Sin dirección",
-                addressShort: store.addressComponents || [],
-                placeUri: store.googleMapsLinks?.placeUri,
-              };
-            }
-            return null;
-          })
-          .filter(Boolean);
-
         if (isMounted) {
-          setStores(storesArray);
+          setStores(data);
           setLoading(false);
         }
       } catch (error) {
@@ -158,7 +140,7 @@ export default function LocalesPage() {
       <div className="space-y-4">
         <Skeleton className="h-10 w-full rounded-lg" />
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-24 w-full rounded-xl" />
+          <Skeleton key={i} className="h-32 w-full rounded-xl" />
         ))}
       </div>
     );
@@ -204,6 +186,13 @@ export default function LocalesPage() {
                         {formatAddress(store.addressShort)}
                       </p>
                     </div>
+                    {/* Rating */}
+                    {store.rating && (
+                      <div className="flex items-center gap-1 mt-2">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <span className="text-sm font-medium text-gray-700">{store.rating}</span>
+                      </div>
+                    )}
                   </div>
                   {getDistance(store) && (
                     <div className="flex items-center gap-1 text-sm text-brand bg-brand/10 px-2 py-1 rounded-full">
@@ -212,13 +201,27 @@ export default function LocalesPage() {
                     </div>
                   )}
                 </div>
-                <Button
-                  className="w-full mt-3 bg-brand hover:bg-brand/90"
-                  onClick={() => window.open(store.placeUri, '_blank')}
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Ver en Google Maps
-                </Button>
+
+                {/* Buttons */}
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    className="flex-1 bg-brand hover:bg-brand/90"
+                    onClick={() => window.open(store.placeUri, '_blank')}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Ver en Maps
+                  </Button>
+                  {store.writeReviewUri && (
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+                      onClick={() => window.open(store.writeReviewUri, '_blank')}
+                    >
+                      <Star className="w-4 h-4 mr-2" />
+                      Recomendar
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}

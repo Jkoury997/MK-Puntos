@@ -51,38 +51,18 @@ function Mapastores({ onSelectStore }) {
   }, []);
   
 
-  // Cargar datos de stores desde el archivo JSON
+  // Cargar datos de stores desde la API con caché
   useEffect(() => {
     const controller = new AbortController();
 
     const loadStores = async () => {
       try {
-        const response = await fetch("/places-details.json", { signal: controller.signal });
+        const response = await fetch("/api/stores", { signal: controller.signal });
         if (!response.ok) {
-          throw new Error(`Error al cargar el archivo JSON: ${response.statusText}`);
+          throw new Error(`Error al cargar tiendas: ${response.statusText}`);
         }
         const data = await response.json();
-
-        const storesArray = Object.keys(data)
-          .map((key) => {
-            const store = data[key];
-            if (typeof store.location?.latitude === "number" && typeof store.location?.longitude === "number") {
-              return {
-                id: key,
-                name: store.displayName?.text || "Sin nombre",
-                lat: store.location.latitude,
-                lng: store.location.longitude,
-                address: store.formattedAddress || "Sin dirección",
-                addressShort: store.addressComponents || [],
-                placeUri: store.googleMapsLinks?.placeUri,
-                writeReview: store.googleMapsLinks?.writeAReviewUri
-              };
-            }
-            return null;
-          })
-          .filter((store) => store !== null);
-
-        setStores(storesArray);
+        setStores(data);
       } catch (error) {
         if (error.name !== 'AbortError') {
           console.error("Error cargando stores:", error);

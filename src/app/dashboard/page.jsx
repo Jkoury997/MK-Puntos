@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/contexts/UserContext";
 import QRCode from "react-qr-code";
-import { QrCode } from "lucide-react";
+import { QrCode, Star, ExternalLink } from "lucide-react";
 import MapaStores from "@/components/component/client/components/maps-store";
 
 export default function DashboardPage() {
@@ -86,13 +86,24 @@ export default function DashboardPage() {
                   {store.addressShort?.[3]?.shortText || ''}
                 </CardDescription>
               </CardHeader>
-              <CardFooter className="pb-4">
+              <CardFooter className="pb-4 flex gap-2">
                 <Button
-                  className="w-full bg-brand hover:bg-brand/90"
+                  className="flex-1 bg-brand hover:bg-brand/90"
                   onClick={() => window.open(store.placeUri, '_blank')}
                 >
-                  Ver en Google Maps
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Ver en Maps
                 </Button>
+                {store.writeReviewUri && (
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+                    onClick={() => window.open(store.writeReviewUri, '_blank')}
+                  >
+                    <Star className="w-4 h-4 mr-2" />
+                    Recomendar
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           )}
