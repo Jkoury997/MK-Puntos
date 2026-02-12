@@ -71,31 +71,19 @@ export default function TicketsPage() {
     return parseDate(b.Fecha) - parseDate(a.Fecha);
   });
 
-  const totalCompras = ticketList.reduce((acc, t) => acc + (t.Monto || 0), 0);
-
   return (
     <div className="space-y-6">
-      {/* Header con resumen */}
-      <div className="bg-gradient-to-r from-brand to-pink-400 rounded-2xl p-5 text-white">
-        <div className="flex items-center gap-4">
-          <div className="bg-white/20 p-3 rounded-xl">
-            <ReceiptText className="w-7 h-7" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">Mis Tickets</h1>
-            <p className="text-white/80 text-sm">
-              {ticketList.length} {ticketList.length === 1 ? 'compra realizada' : 'compras realizadas'}
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="bg-brand/10 p-2.5 rounded-xl">
+          <ReceiptText className="w-6 h-6 text-brand" />
         </div>
-        {ticketList.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-white/20">
-            <p className="text-white/70 text-xs uppercase tracking-wide">Total acumulado</p>
-            <p className="text-2xl font-bold">
-              {totalCompras.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}
-            </p>
-          </div>
-        )}
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">Mis Tickets</h1>
+          <p className="text-gray-500 text-sm">
+            {ticketList.length} {ticketList.length === 1 ? 'compra realizada' : 'compras realizadas'}
+          </p>
+        </div>
       </div>
 
       {/* Lista de tickets */}
