@@ -27,16 +27,13 @@ export async function POST(request) {
       body: JSON.stringify({ email,otpCode:otp})
     });
 
-    const data = await response.json()
-    console.log(data)
+    const data = await response.json();
 
     if (!response.ok) {
-      const errorDetails = await response.json();
-      return NextResponse.json({ error: errorDetails.message || 'Error al enviar el correo de recuperación' }, { status: response.status });
+      return NextResponse.json({ error: data.message || 'Error al verificar el código OTP' }, { status: response.status });
     }
 
-
-    return NextResponse.json({ message: 'Correo de recuperación enviado' }, { status: 200 });
+    return NextResponse.json({ message: 'Código OTP verificado correctamente', data }, { status: 200 });
   } catch (error) {
     console.error('Error al enviar el correo de recuperación:', error);
     return NextResponse.json({ error: 'Error al enviar el correo de recuperación' }, { status: 500 });

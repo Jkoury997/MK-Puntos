@@ -11,14 +11,17 @@ export async function GET(req) {
         
         const cookieStore = cookies();
         const Token = cookieStore.get("Token");
-       
 
         if (!dni || dni.trim() === '') {
             return NextResponse.json({ error: 'DNI es requerido' }, { status: 400 });
         }
 
+        if (!Token?.value) {
+            return NextResponse.json({ error: 'Token no encontrado. Por favor inicie sesión.' }, { status: 401 });
+        }
+
         // Enviar la solicitud de consulta al backend
-        const response = await fetch(`${URL_API_NASUS}/api/Tiendas/ConsultarPuntos/${dni}`, {
+        const response = await fetch(`${URL_API_NASUS}/api/Tiendas/ConsultarPuntos/${encodeURIComponent(dni)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

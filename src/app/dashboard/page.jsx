@@ -1,222 +1,103 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Home, Ticket, ShoppingBag, Percent, ReceiptText, ArrowBigLeft, PercentDiamond } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useUser } from "@/contexts/UserContext";
+import QRCode from "react-qr-code";
+import { QrCode } from "lucide-react";
+import MapaStores from "@/components/component/client/components/maps-store";
 
-import HomeView from "@/components/component/client/views/home-view";
-import TicketsView from "@/components/component/client/views/tickets-view";
-import PedidosView from "@/components/component/client/views/pedidos-view";
-import AllLocationsView from "@/components/component/client/views/all-location-view";
-import DescuentosView from "@/components/component/client/views/descuentos-view";
-import FingerprintJS from "@fingerprintjs/fingerprintjs";
-import { driver } from "driver.js";
-
-
-
-export default function Page() {
-  const [userData, setUserData] = useState(null);
-  const [activeView, setActiveView] = useState("home");
-  const [showAllLocations, setShowAllLocations] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [isTutorialCompletedInicio, setIsTutorialCompletedInicio] = useState(false)
-  const generateFingerprint = async () => {
-    const fp = await FingerprintJS.load();
-    const result = await fp.get();
-    return result.visitorId;
-  };
-
-
-
-  const fetchUserDetails = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/auth/user/info`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Error en la solicitud: ${response.status} ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-      console.log("Datos del usuario:", data);
-
-      setUserData(data);
-    } catch (error) {
-      console.error("Error al obtener los datos del cliente:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+export default function DashboardPage() {
+  const { userData, loading } = useUser();
+  const [store, setStore] = useState(null);
+  const [qr, setQr] = useState(null);
+  const storeInfoRef = useRef(null);
 
   useEffect(() => {
-    fetchUserDetails();
-
-    // Forzar scroll al inicio de la página
-    const mainElement = document.getElementById("mainContainer");
-    if (mainElement) {
-      mainElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (userData?.dni) {
+      setQr(`Id${userData.dni}Id`);
     }
-  }, []);
+  }, [userData]);
 
+  const handleStoreSelection = (selectedStore) => {
+    setStore(selectedStore);
 
-    const startTourInicio = () => {
-
-      
-      const driverObj = driver({
-        popoverClass: 'driverjs-theme',
-        nextBtnText: "Siguiente",
-        prevBtnText: "Volver",
-        doneBtnText: "Terminar",
-        animate: true, // Animaciones entre pasos
-        allowClose: false,
-        steps: [
-          {
-            popover: {
-              title: "¡Bienvenido a MK!",
-              description: "Te guiaremos en un breve recorrido para que descubras todas las funcionalidades.",
-              onNextClick: () => {
-                setTimeout(() => {
-                  const element = document.getElementById("HomeBar");
-                  if (element) {
-                    console.log("Elemento encontrado:", element);
-                    element.scrollIntoView({ behavior: "smooth", block: "start" });
-                  } else {
-                    console.error("Elemento no encontrado: HomeBar");
-                  }
-                }, 100);
-                driverObj.moveNext()
-              },
-            },
-          },
-          {
-            element: "#buttomHome",
-            popover: {
-              title: "Inicio",
-              description: "Aquí encontrarás un resumen de las principales opciones disponibles.",
-              position: "top",
-            },
-          },
-          {
-            element: "#QR",
-            popover: {
-              title: "Código QR",
-              description: "Accede a tu código QR para utilizarlo en nuestras tiendas afiliadas.",
-              position: "top",
-            },
-          },
-          {
-            element: "#PUNTOS",
-            popover: {
-              title: "Puntos MK",
-              description: "Consulta aquí la cantidad de puntos que has acumulado por tus compras.",
-              position: "top",
-            },
-          },
-          {
-            element: "#TIENDAS",
-            popover: {
-              title: "Tiendas Cercanas",
-              description: "Explora las tiendas más cercanas a tu ubicación y sus beneficios.",
-              position: "top",
-            },
-          },
-        ],
-        
-        onNextClick:() => {
-            if(driverObj.isLastStep()){
-              console.log("Hola")
-                localStorage.setItem("tutorialCompletedInicio", "true");
-                setIsTutorialCompletedInicio(true);
-            }
-            driverObj.moveNext()
-        }
-     
-
-    });
-  
-      driverObj.drive();
-    };
-    useEffect(() => {
-      const tutorialCompletedInicio = localStorage.getItem("tutorialCompletedInicio");
-      setIsTutorialCompletedInicio(tutorialCompletedInicio);
-    
-      if (!tutorialCompletedInicio && !loading ) {
-        setTimeout(() => {
-          startTourInicio();
-        }, 1000); // Espera 500ms para asegurarte de que el DOM está listo
+    // Cleanup: use ref instead of setTimeout
+    const scrollTimeout = setTimeout(() => {
+      if (storeInfoRef.current) {
+        storeInfoRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-    }, [loading]);
-    
-  return (
-    <div className="flex justify-center min-h-screen bg-gray-50 p-4 overflow-auto" id="mainContainer">
-      <div className="w-full max-w-md space-y-4">
-        {showAllLocations ? (
-          <AllLocationsView setShowAllLocations={setShowAllLocations} />
-        ) : (
-          <>
+    }, 100);
 
-            <Tabs
-              value={activeView}
-              onValueChange={setActiveView}
-              className="w-full"
-              
-            >
-              <TabsList className="grid w-full grid-cols-3 bg-white" id="HomeBar">
-                <TabsTrigger
-                  id="buttomHome"
-                  value="home"
-                  className="data-[state=active]:bg-brand data-[state=active]:text-white"
-                >
-                  <Home className="w-5 h-5" />
-                </TabsTrigger>
-                <TabsTrigger
-                  id="buttomTickets"
-                  value="tickets"
-                  className="data-[state=active]:bg-brand data-[state=active]:text-white"
-                >
-                  <ReceiptText className="w-5 h-5" />
-                </TabsTrigger>
-                <TabsTrigger
-                  id="buttomPedidos"
-                  value="pedidos"
-                  className="data-[state=active]:bg-brand data-[state=active]:text-white"
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                </TabsTrigger>
-                <TabsTrigger
-                  id="buttomDescuentos"
-                  value="descuentos"
-                  className="data-[state=active]:bg-brand data-[state=active]:text-white hidden"
-                >
-                  <PercentDiamond className="w-5 h-5" />
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="home">
-                <HomeView
-                  setShowAllLocations={setShowAllLocations}
-                  userData={userData}
-                />
-              </TabsContent>
-              <TabsContent value="tickets">
-                <TicketsView userData={userData} />
-              </TabsContent>
-              <TabsContent value="pedidos">
-                <PedidosView userData={userData} />
-              </TabsContent>
-              <TabsContent value="descuentos">
-                <DescuentosView userData={userData} />
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
+    return () => clearTimeout(scrollTimeout);
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-48 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* QR Code Card */}
+      <Card className="border-none shadow-sm">
+        <CardHeader className="pb-2 text-center">
+          <CardTitle className="text-lg">Tu Código QR</CardTitle>
+          <CardDescription>Mostralo en tiendas para acumular puntos</CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center pb-6">
+          {qr ? (
+            <div className="bg-white p-4 rounded-2xl shadow-inner border">
+              <QRCode size={160} value={qr} level="H" bgColor="#fff" />
+            </div>
+          ) : (
+            <div className="bg-gray-100 p-8 rounded-2xl">
+              <QrCode className="w-24 h-24 text-gray-400" />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Nearby Stores Card */}
+      <Card className="border-none shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Locales Cercanos</CardTitle>
+          <CardDescription>Encuentra tiendas cerca de ti</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="aspect-video relative rounded-lg overflow-hidden border">
+            <MapaStores onSelectStore={handleStoreSelection} />
+          </div>
+
+          {store && (
+            <Card className="border bg-gray-50" ref={storeInfoRef}>
+              <CardHeader className="pb-2 pt-4">
+                <CardTitle className="text-base">{store.name}</CardTitle>
+                <CardDescription className="text-sm">
+                  {store.addressShort?.[1]?.shortText || ''}{' '}
+                  {store.addressShort?.[0]?.shortText || ''},{' '}
+                  {store.addressShort?.[2]?.shortText || ''},{' '}
+                  {store.addressShort?.[3]?.shortText || ''}
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="pb-4">
+                <Button
+                  className="w-full bg-brand hover:bg-brand/90"
+                  onClick={() => window.open(store.placeUri, '_blank')}
+                >
+                  Ver en Google Maps
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -8,6 +8,9 @@ export async function GET(req) {
         const cookieStore = cookies();
         const userId = cookieStore.get("userId");
 
+        if (!userId?.value) {
+            return NextResponse.json({ error: 'Usuario no autenticado' }, { status: 401 });
+        }
 
         // Enviar la solicitud de actualización de usuario al backend
         const response = await fetch(`${URL_API_AUTH}/api/user/${userId.value}`, {

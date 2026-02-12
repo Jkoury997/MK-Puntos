@@ -82,7 +82,7 @@ export default function Page( { searchParams }) {
   };
 
   const handleVerifyOtp = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setError("");
     setLoading(true);
     setSuccess(false)
@@ -139,10 +139,11 @@ export default function Page( { searchParams }) {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
         throw new Error(data.error || "Error al restablecer la contraseña.");
-    }
-    const data = await response.json();
+      }
     setSuccess(true)
     // Manejar respuesta exitosa
       router.push("/auth/login");

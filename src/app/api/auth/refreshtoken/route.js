@@ -27,9 +27,12 @@ export async function GET(req) {
             // Crear una nueva respuesta y agregar las cookies a la respuesta
             const newResponse = NextResponse.json(responseData);
 
-            // Guardar el nuevo accessToken en las cookies
+            // Guardar el nuevo accessToken en las cookies con seguridad
             newResponse.cookies.set('accessToken', responseData.accessToken, {
                 path: '/',
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
             });
 
             return newResponse;

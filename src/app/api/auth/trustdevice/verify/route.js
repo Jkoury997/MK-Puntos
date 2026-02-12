@@ -33,8 +33,10 @@ export async function POST(req) {
         if (response.ok) {
             // Crear una nueva respuesta y agregar la cookie del fingerprint
             cookieStore.set('fingerprint', fingerprint, {
-                path: '/'
-
+                path: '/',
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
             });
             const res = NextResponse.json(responseData);
             return res;

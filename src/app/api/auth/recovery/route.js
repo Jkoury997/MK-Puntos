@@ -1,23 +1,29 @@
 import { NextResponse } from 'next/server';
+import { validators } from '@/lib/validations';
+import { otpRateLimit } from '@/lib/rate-limit';
 
 const URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH;
 
-function toLowerCaseString(str) {
-  return str ? str.toLowerCase() : '';
-}
-
 export async function POST(request) {
-
   try {
-    let { email } = await request.json();
-
-
-    if (!email) {
-      return NextResponse.json({ error: 'Correo electrónico es requerido' }, { status: 400 });
+    // Rate limiting para OTP
+    const rateLimitResult = await otpRateLimit(request);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: rateLimitResult.message },
+        { status: 429, headers: { 'Retry-After': String(rateLimitResult.resetInSeconds) } }
+      );
     }
 
-    // Convertir email a minúsculas
-    email = toLowerCaseString(email);
+    const body = await request.json();
+
+    // Validar email
+    const emailVal = validators.email(body.email);
+    if (!emailVal.valid) {
+      return NextResponse.json({ error: emailVal.error }, { status: 400 });
+    }
+
+    const email = emailVal.value;
 
     const response = await fetch(`${URL_API_AUTH}/api/recovery/generate-otp`, {
       method: 'POST',
@@ -27,14 +33,11 @@ export async function POST(request) {
       body: JSON.stringify({ email})
     });
 
-    const data = await response.json()
-    console.log(data)
+    const data = await response.json();
 
     if (!response.ok) {
-      const errorDetails = await response.json();
-      return NextResponse.json({ error: errorDetails.message || 'Error al enviar el correo de recuperación' }, { status: response.status });
+      return NextResponse.json({ error: data.message || 'Error al enviar el correo de recuperación' }, { status: response.status });
     }
-
 
     return NextResponse.json({ message: 'Correo de recuperación enviado' }, { status: 200 });
   } catch (error) {

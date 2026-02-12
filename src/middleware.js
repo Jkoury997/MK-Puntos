@@ -68,9 +68,14 @@ async function refreshAccessToken(refreshToken, request) {
 
     const { accessToken } = await response.json();
 
-    // Establecer el nuevo accessToken en las cookies
+    // Establecer el nuevo accessToken en las cookies con seguridad
     const newResponse = NextResponse.next();
-    newResponse.cookies.set("accessToken", accessToken, { path: '/' });
+    newResponse.cookies.set("accessToken", accessToken, {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
 
     return newResponse;
   } catch (error) {

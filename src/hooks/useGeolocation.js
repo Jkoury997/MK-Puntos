@@ -25,5 +25,5 @@ export default function useGeolocation() {
         );
     }, []);
 
-    return { location, errorlocation:error };
+    return { location, errorLocation: error, error };
 }
