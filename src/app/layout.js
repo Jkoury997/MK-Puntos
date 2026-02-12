@@ -3,9 +3,9 @@ import "driver.js/dist/driver.css";
 import "./globals.css";
 
 const APP_NAME = "MK Puntos";
-const APP_DEFAULT_TITLE = "Marcela Koury by Make You S.R.L. App";
-const APP_TITLE_TEMPLATE = "MK Puntos";
-const APP_DESCRIPTION = "Marcela Koury Puntos";
+const APP_DEFAULT_TITLE = "MK Puntos - Programa de Fidelidad Marcela Koury";
+const APP_TITLE_TEMPLATE = "%s | MK Puntos";
+const APP_DESCRIPTION = "Acumula puntos en tus compras, encuentra tiendas cercanas y accede a beneficios exclusivos con MK Puntos de Marcela Koury.";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,6 +18,8 @@ export const metadata = {
   },
   description: APP_DESCRIPTION,
   manifest: "/manifest.json",
+  keywords: ["Marcela Koury", "MK Puntos", "programa de fidelidad", "puntos", "descuentos", "lencería"],
+  authors: [{ name: "Marcela Koury" }],
   formatDetection: {
     telephone: false,
   },
@@ -29,6 +31,7 @@ export const metadata = {
       template: APP_TITLE_TEMPLATE,
     },
     description: APP_DESCRIPTION,
+    locale: "es_AR",
   },
   twitter: {
     card: "summary",
@@ -37,6 +40,10 @@ export const metadata = {
       template: APP_TITLE_TEMPLATE,
     },
     description: APP_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

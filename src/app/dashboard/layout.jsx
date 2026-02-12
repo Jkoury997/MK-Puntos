@@ -1,41 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
+import { UserProvider } from "@/contexts/UserContext";
+import DashboardHeader from "@/components/dashboard/header";
+import BottomNav from "@/components/dashboard/bottom-nav";
 
 export default function DashboardLayout({ children }) {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true); // Estado de carga
+  const [loading, setLoading] = useState(true);
 
-  const fetchLoginExternal = async () => {
+  const fetchLoginExternal = useCallback(async () => {
     try {
-      // Primera solicitud al endpoint `Login`
       const responseLogin = await fetch(`/api/jinx/Login`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!responseLogin.ok) {
-        throw new Error(`Error en la solicitud Login: ${responseLogin.status} ${responseLogin.statusText}`);
+        throw new Error(`Error Login: ${responseLogin.status}`);
       }
 
-      // Segunda solicitud al endpoint `UserAccess`
       const responseUserAccess = await fetch(`/api/jinx/UserAccess`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!responseUserAccess.ok) {
-        throw new Error(`Error en la solicitud UserAccess: ${responseUserAccess.status} ${responseUserAccess.statusText}`);
+        throw new Error(`Error UserAccess: ${responseUserAccess.status}`);
       }
-
-      // Simular retraso (opcional, solo para pruebas visuales)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
       console.error("Error al obtener datos:", error);
       toast({
@@ -44,30 +38,35 @@ export default function DashboardLayout({ children }) {
         variant: "destructive",
       });
     } finally {
-      setLoading(false); // Finaliza el estado de carga
+      setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchLoginExternal();
-  }, []); // Se ejecuta al montar el componente
+  }, [fetchLoginExternal]);
 
   if (loading) {
-    // Mostrar indicador de carga mientras se obtienen los datos
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-lg font-semibold">Cargando datos...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand mx-auto mb-4"></div>
+          <p className="text-lg font-semibold text-gray-700">Cargando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <>
+    <UserProvider>
       <Toaster />
-      <div>{children}</div>
-    </>
+      <div className="min-h-screen bg-gray-50 pb-20">
+        <DashboardHeader />
+        <main className="max-w-md mx-auto px-4 py-4">
+          {children}
+        </main>
+        <BottomNav />
+      </div>
+    </UserProvider>
   );
 }

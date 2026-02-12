@@ -1,16 +1,40 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { validators } from '@/lib/validations';
+import { authRateLimit } from '@/lib/rate-limit';
 
 const URL_API_AUTH = process.env.NEXT_PUBLIC_URL_API_AUTH;
 
 
 export async function POST(req) {
     try {
+        // Rate limiting
+        const rateLimitResult = await authRateLimit(req);
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                { error: rateLimitResult.message },
+                { status: 429, headers: { 'Retry-After': String(rateLimitResult.resetInSeconds) } }
+            );
+        }
+
         const body = await req.json();
         const cookieStore = cookies();
-        
-        // Supongamos que el cuerpo de la solicitud incluye el email y password
-        const { email, password } = body;
+
+        // Validar email
+        const emailValidation = validators.email(body.email);
+        if (!emailValidation.valid) {
+            return NextResponse.json({ error: emailValidation.error }, { status: 400 });
+        }
+
+        // Validar password
+        const passwordValidation = validators.password(body.password);
+        if (!passwordValidation.valid) {
+            return NextResponse.json({ error: passwordValidation.error }, { status: 400 });
+        }
+
+        const email = emailValidation.value;
+        const password = passwordValidation.value;
+
         // Enviar la solicitud de inicio de sesión al backend
         const response = await fetch(`${URL_API_AUTH}/api/auth/login`, {
             method: 'POST',

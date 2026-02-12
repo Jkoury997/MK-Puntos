@@ -13,48 +13,51 @@ function Mapastores({ onSelectStore }) {
   const [stores, setStores] = useState([]); // Estado para las stores
 
   useEffect(() => {
+    let isMounted = true;
+
     const getLocation = async () => {
       try {
         const permission = await navigator.permissions.query({ name: "geolocation" });
-        if (permission.state === "granted") {
-          navigator.geolocation.getCurrentPosition((position) => {
-            setCurrentPosition({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-          });
-        } else if (permission.state === "prompt") {
+        if (permission.state === "granted" || permission.state === "prompt") {
           navigator.geolocation.getCurrentPosition(
             (position) => {
-              setCurrentPosition({
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              });
+              if (isMounted) {
+                setCurrentPosition({
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude,
+                });
+              }
             },
-            (error) => {
-              console.error("Error obteniendo la ubicación:", error);
-              setCurrentPosition({ lat: -34.64039930091608, lng: -58.52714949271773 });
+            () => {
+              if (isMounted) {
+                setCurrentPosition({ lat: -34.64039930091608, lng: -58.52714949271773 });
+              }
             }
           );
         } else {
-          console.error("Permiso de ubicación denegado");
+          if (isMounted) {
+            setCurrentPosition({ lat: -34.64039930091608, lng: -58.52714949271773 });
+          }
+        }
+      } catch {
+        if (isMounted) {
           setCurrentPosition({ lat: -34.64039930091608, lng: -58.52714949271773 });
         }
-      } catch (error) {
-        console.error("Error verificando permisos:", error);
-        setCurrentPosition({ lat: -34.64039930091608, lng: -58.52714949271773 });
       }
     };
-  
+
     getLocation();
+    return () => { isMounted = false; };
   }, []);
   
 
   // Cargar datos de stores desde el archivo JSON
   useEffect(() => {
+    const controller = new AbortController();
+
     const loadStores = async () => {
       try {
-        const response = await fetch("/places-details.json");
+        const response = await fetch("/places-details.json", { signal: controller.signal });
         if (!response.ok) {
           throw new Error(`Error al cargar el archivo JSON: ${response.statusText}`);
         }
@@ -66,27 +69,29 @@ function Mapastores({ onSelectStore }) {
             if (typeof store.location?.latitude === "number" && typeof store.location?.longitude === "number") {
               return {
                 id: key,
-                name: store.displayName.text || "Sin nombre",
+                name: store.displayName?.text || "Sin nombre",
                 lat: store.location.latitude,
                 lng: store.location.longitude,
                 address: store.formattedAddress || "Sin dirección",
-                addressShort:store.addressComponents,
-                placeUri:store.googleMapsLinks.placeUri,
-                writeReview:store.googleMapsLinks.writeAReviewUri
+                addressShort: store.addressComponents || [],
+                placeUri: store.googleMapsLinks?.placeUri,
+                writeReview: store.googleMapsLinks?.writeAReviewUri
               };
             }
-            return null; // Ignorar si lat o lng no son válidos
+            return null;
           })
-          .filter((store) => store !== null); // Eliminar stores inválidas
+          .filter((store) => store !== null);
 
         setStores(storesArray);
-        
       } catch (error) {
-        console.error("Error cargando stores:", error);
+        if (error.name !== 'AbortError') {
+          console.error("Error cargando stores:", error);
+        }
       }
     };
 
     loadStores();
+    return () => controller.abort();
   }, []);
 
   if (!currentPosition) {
