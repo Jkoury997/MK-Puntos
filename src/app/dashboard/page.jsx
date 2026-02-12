@@ -86,9 +86,9 @@ export default function DashboardPage() {
                   {store.addressShort?.[3]?.shortText || ''}
                 </CardDescription>
               </CardHeader>
-              <CardFooter className="pb-4 flex gap-2">
+              <CardFooter className="pb-4 flex flex-col gap-2">
                 <Button
-                  className="flex-1 bg-brand hover:bg-brand/90"
+                  className="w-full bg-brand hover:bg-brand/90"
                   onClick={() => window.open(store.placeUri, '_blank')}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
@@ -97,7 +97,7 @@ export default function DashboardPage() {
                 {store.writeReviewUri && (
                   <Button
                     variant="outline"
-                    className="flex-1 border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+                    className="w-full border-yellow-500 text-yellow-600 hover:bg-yellow-50"
                     onClick={() => window.open(store.writeReviewUri, '_blank')}
                   >
                     <Star className="w-4 h-4 mr-2" />
