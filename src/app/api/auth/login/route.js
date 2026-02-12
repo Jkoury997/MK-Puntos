@@ -26,14 +26,13 @@ export async function POST(req) {
             return NextResponse.json({ error: emailValidation.error }, { status: 400 });
         }
 
-        // Validar password
-        const passwordValidation = validators.password(body.password);
-        if (!passwordValidation.valid) {
-            return NextResponse.json({ error: passwordValidation.error }, { status: 400 });
+        // Solo verificar que password no esté vacío
+        if (!body.password) {
+            return NextResponse.json({ error: 'Contraseña es requerida' }, { status: 400 });
         }
 
         const email = emailValidation.value;
-        const password = passwordValidation.value;
+        const password = body.password;
 
         // Enviar la solicitud de inicio de sesión al backend
         const response = await fetch(`${URL_API_AUTH}/api/auth/login`, {
